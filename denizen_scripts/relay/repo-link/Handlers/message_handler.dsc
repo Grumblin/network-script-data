@@ -1,5 +1,6 @@
 Message_Handler:
   type: world
+  debug: false
   events:
     on server generates exception:
       - if <context.message> == "no value present":
@@ -12,9 +13,9 @@ Message_Handler:
         - stop
       - define Author <context.Author>
 
-      - if <context.Message||WebHook> == WebHook:
+      - if <context.message.message||WebHook> == WebHook:
         - stop
-      - define Message <context.Message>
+      - define Message <context.Message.message>
 
       - if <context.Bot> == <[Author]>:
         - stop
@@ -35,6 +36,8 @@ Message_Handler:
     # % ██ [ Command  Based Scripts          ] ██
       - if <[Message].starts_with[/]>:
         - choose <[Message].before[<&sp>].after[/]>:
+          - case repository repo git github:
+            - ~Run Repository_DCommand def:<[Channel]>
           - case reload:
             - ~Run Reload_Scripts_DCommand def:<list_single[<[Message]>].include[<[Channel]>|<[Author]>|<[Group]>]>
           - case tag parse t:

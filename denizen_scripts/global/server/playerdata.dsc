@@ -37,7 +37,7 @@ Player_Data_Join_Event:
     - define Name <player[<[UUID]>].name>
     - if !<yaml[<[GlobalYaml]>].contains[Display_Name]>:
       - yaml id:<[GlobalYaml]> set Display_Name:<[Name]>
-    - adjust  <player[<[UUID]>]> Display_Name:<yaml[<[GlobalYaml]>].read[Display_Name]>
+    - adjust <player[<[UUID]>]> Display_Name:<yaml[<[GlobalYaml]>].read[Display_Name]>
 
   # % ██ [ Load Tab_Display_Name ] ██
     - if !<yaml[<[GlobalYaml]>].contains[Tab_Display_name]>:
@@ -90,3 +90,9 @@ Unload_Player_Data:
   # % ██ [ Unload Global Player Data ] ██
     - ~yaml id:global.player.<[UUID]> savefile:data/global/players/<[UUID]>.yml
     - yaml id:global.player.<[UUID]> unload
+
+player_data_safe_modify:
+  type: task
+  definitions: uuid|node|value
+  script:
+    - yaml id:global.player.<[uuid]> set <[node]>:<[value]>

@@ -10,7 +10,7 @@ Tag_Parser_DCommand:
     - Lead Developer
     - Developer
   definitions: Message|Channel|Author|Group
-  debug: true
+  debug: false
   Context: Color
   speed: 0
   script:
@@ -32,7 +32,7 @@ Tag_Parser_DCommand:
           - define Hook <script[DDTBCTY].data_key[WebHooks.<[Channel]>.hook]>
           - define Embeds "<list[<map[description/<[Args].first> is **Not Connected** or is **OFFLINE**.|color/<[Color]>]>]>"
           - define Data "<map[username/Server Status Warning|avatar_url/https://cdn.discordapp.com/attachments/625076684558958638/739228903700168734/icons8-code-96.png].with[embeds].as[<[Embeds]>].to_json>"
-          - define headers <list[User-Agent/really|Content-Type/application/json]>
+          - define headers <yaml[Saved_Headers].read[Discord.Webhook_Message]>
           - ~webget <[Hook]> data:<[Data]> headers:<[Headers]>
           - stop
         - else:
@@ -55,12 +55,13 @@ Tag_Parser_DCommand:
     - define Data "<map[username/Tag Parser Results|avatar_url/https://cdn.discordapp.com/attachments/625076684558958638/739228903700168734/icons8-code-96.png].with[embeds].as[<[Embeds]>].to_json>"
 
     - define Hook <script[DDTBCTY].data_key[WebHooks.<[Channel]>.hook]>
-    - define headers <list[User-Agent/really|Content-Type/application/json]>
+    - define headers <yaml[Saved_Headers].read[Discord.Webhook_Message]>
     - ~webget <[Hook]> data:<[Data]> headers:<[Headers]>
 
 # $ ██ [ Run on Relay ] ██
 Tag_ParseFrom:
   type: task
+  debug: false
   definitions: Server|Tag
   script:
     - flag server TagUnparsed:<[Tag].escaped> duration:1s
@@ -70,6 +71,7 @@ Tag_ParseFrom:
 # $ ██ [ Run on Server induced by Relay ] ██
 Tag_Parse:
   type: task
+  debug: false
   definitions: Tag
   script:
     - define TagData <[Tag].unescaped.parsed>
@@ -82,6 +84,7 @@ Tag_Parse:
 # $ ██ [ Run on Relay induced by Server ] ██
 Tag_Receive:
   type: task
+  debug: false
   definitions: TagData|TagError
   script:
   # % ██ [                     ] ██
@@ -100,7 +103,7 @@ Tag_Receive:
     - define Data "<map[username/Tag Parser Results|avatar_url/https://cdn.discordapp.com/attachments/625076684558958638/739228903700168734/icons8-code-96.png].with[embeds].as[<[Embeds]>].to_json>"
 
     - define Hook <script[DDTBCTY].data_key[WebHooks.<[Channel]>.hook]>
-    - define headers <list[User-Agent/really|Content-Type/application/json]>
+    - define headers <yaml[Saved_Headers].read[Discord.Webhook_Message]>
     - ~webget <[Hook]> data:<[Data]> headers:<[Headers]>
 
 Tag_Parse_Listener:
@@ -109,7 +112,7 @@ Tag_Parse_Listener:
   events:
     on script generates error:
       - announce to_console "Script Generates Error-------------------------------------------------"
-      - if <context.queue.id.contains[Tag_Parse]>:
+      - if <context.queue.id.contains[Tag_Parse]||false>:
         - determine passively cancelled
         - announce to_console "<&4>Error:<&c> <context.message>"
         - announce to_console "<&4>Error:<&c> <context.queue>"
@@ -117,7 +120,7 @@ Tag_Parse_Listener:
         - announce to_console "<&4>Error:<&c> <context.line>"
     on server generates exception:
       - announce to_console "Server Generates exception-------------------------------------------------"
-      - if <context.queue.id.contains[Tag_Parse]>:
+      - if <context.queue.id.contains[Tag_Parse]||false>:
         - determine passively cancelled
         - announce to_console "<&4>Error:<&c> <context.message>"
         - announce to_console "<&4>Error:<&c> <context.full_trace>"

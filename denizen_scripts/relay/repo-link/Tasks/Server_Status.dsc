@@ -27,7 +27,7 @@ Status_DCommand:
     - if <[Server]> == help:
       - define Data <yaml[SDS_StatusDCmd].to_json>
       - define Hook <script[DDTBCTY].data_key[WebHooks.<[Channel]>.hook]>
-      - define headers <list[User-Agent/really|Content-Type/application/json]>
+      - define headers <yaml[Saved_Headers].read[Discord.Webhook_Message]>
       - ~webget <[Hook]> data:<[Data]> headers:<[Headers]>
       - stop
 
@@ -146,7 +146,7 @@ Status_DCommand:
       nodes:
         - tps
     Scripts:
-      tag: "Total Scripts<&co> `(<server.scripts.size>)`<&nl>Yaml Files<&co> `(<yaml.list.size>)`<&nl><server.scripts.parse[data_key[type]].deduplicate.parse_tag[<[Parse_Value]> Scripts<&co> `(<server.scripts.filter[data_key[type].is[==].to[<[Parse_Value]>]].size>)`].separated_by[<&nl>]>"
+      tag: "Total Scripts<&co> `(<server.scripts.size>)`<&nl>Yaml Files<&co> `(<yaml.list.size>)`<&nl><server.scripts.parse[data_key[type]].deduplicate.parse_tag[<[Parse_Value].to_titlecase> Scripts<&co> `(<server.scripts.filter[data_key[type].is[==].to[<[Parse_Value]>]].size>)`].separated_by[<&nl>]>"
       nodes:
         - s
         - scripts
