@@ -10,19 +10,10 @@ global_data_handler:
       - define Name <context.name>
       - define UUID <context.uuid>
       - define GlobalYaml global.player.<[UUID]>
-      - yaml id:data_handler set player.<[UUID]>:<empty>
 
     # % ██ [ Verify Global Player Data Exists ] ██
       - define Directory data/global/players/<[UUID]>.yml
       - if !<server.has_file[<[Directory]>]>:
-        # $ ██ [ Temporary for resolving current playerdata prior to transition ] ██
-        - if <server.has_file[data/globalData/players/<[UUID]>.yml]>:
-          - yaml id:<[GlobalYaml]> load:data/globalData/players/<[UUID]>.yml
-          - yaml id:<[GlobalYaml]> savefile:<[Directory]>
-          - yaml id:<[GlobalYaml]> unload
-          - stop
-        # $ ██ [ -------------------------------------------------------------- ] ██
-
         - yaml id:<[GlobalYaml]> create
         - yaml id:<[GlobalYaml]> savefile:<[Directory]>
 
@@ -31,37 +22,40 @@ global_data_handler:
       - define Name <context.name>
       - define UUID <context.uuid>
       - define Server <context.server>
-      - define PlayerMap <map.with[Name].as[<[Name]>].with[UUID].as[<[UUID]>]>
+      - if <yaml[data_handler].contains[players.<[UUID]>.server]>:
+        - define Old_Server <yaml[data_handler].read[players.uuids.<[UUID]>.server]>
+      - define PlayerMap <map.with[Name].as[<[Name]>].with[UUID].as[<[UUID]>].with[Server].as[<[Server]>]>
       - define LocalServers <yaml[bungee.config].list_keys[servers].filter_tag[<yaml[bungee.config].read[servers.<[filter_value]>.address].starts_with[localhost]>]>
 
     # % ██ [ Track Player ] ██
-      - if <yaml[data_handler].contains[player.<[UUID]>.server]>:
-        - yaml id:data_handler set server.<yaml[data_handler].read[player.<[UUID]>.server]>:<-:<[PlayerMap]>
-        - define Event Switched
-      - else:
-        - define Event Joined
-      - yaml id:data_handler set player.<[UUID]>.server:<[Server]>
-      - yaml id:data_handler set server.<[Server]>:->:<[PlayerMap]>
+      - if <yaml[data_handler].contains[players.<[UUID]>.server]>:
+        - yaml id:data_handler set servers.<[Old_Server]>:<-:<[UUID]>
+      - yaml id:data_handler set players.uuids.<[UUID]>.name:<[name]>
+      - yaml id:data_handler set players.uuids.<[UUID]>.server:<[server]>
+      - yaml id:data_handler set servers.<[server]>:->:<[UUID]>
+      - yaml id:data_handler set players.names.<[name]>.UUID:<[UUID]>
+      - yaml id:data_handler set players.names.<[name]>.server:<[server]>
 
     # % ██ [ Fire Player Login Events ] ██
       - if <[LocalServers].contains[<[Server]>]>:
-        - bungeerun <[Server]> Player_Data_Join_Event def:<[UUID]>|<[Event]>
+        - bungeerun <[Server]> Player_Data_Join_Event def:<[UUID]>|Switched
       - else:
         - yaml id:global.player.<[UUID]> load:data/global/players/<[UUID]>.yml
         - define PlayerData <yaml[global.player.<[UUID]>].read[]>
-        - run External_Player_Data_Join_Event def:<list_single[<[PlayerMap]>].include_single[<[PlayerData]>].include[<[Server]>|<[Event]>]>
+        - run External_Player_Data_Join_Event def:<list_single[<[PlayerMap]>].include_single[<[PlayerData]>].include[<[Server]>|Joined]>
 
     on bungee player leaves network:
     # % ██ [ Cache Player Info ] ██
       - define Name <context.name>
       - define UUID <context.uuid>
-      - define Server <yaml[data_handler].read[player.<[UUID]>.server]>
-      - define PlayerMap <map.with[Name].as[<[Name]>].with[UUID].as[<[UUID]>]>
+      - define Server <yaml[data_handler].read[players.uuids.<[uuid]>.server]>
+      - define PlayerMap <map.with[name].as[<[name]>].with[uuid].as[<[uuid]>].with[server].as[<[server]>]>
       - define LocalServers <yaml[bungee.config].list_keys[servers].filter_tag[<yaml[bungee.config].read[servers.<[filter_value]>.address].starts_with[localhost]>]>
 
-    # % ██ [ Track Player ] ██
-      - yaml id:data_handler set player.<[UUID]>:!
-      - yaml id:data_handler set server.<[Server]>:<-:<[PlayerMap]>
+    # % ██ [ Remove Player Data ] ██
+      - yaml id:data_handler set players.uuids.<[UUID]>:!
+      - yaml id:data_handler set servers.<[server]>:<-:<[UUID]>
+      - yaml id:data_handler set players.names.<[Name]>:!
 
     # % ██ [ Fire Player Quit Events ] ██
       - bungeerun <[Server]> Player_Data_Quit_Event def:<[UUID]>
@@ -89,7 +83,7 @@ External_Player_Data_Join_Event:
       - foreach <[PlayerData]>:
         - yaml id:<[GlobalYaml]> Set <[Key]>:<[Value]>
 
-      # % ██ [ Load and Set Display_Name ] ██
+    # % ██ [ Load and Set Display_Name ] ██
       - define Name <player[<[UUID]>].name>
       - if !<yaml[<[GlobalYaml]>].contains[Display_Name]>:
         - yaml id:<[GlobalYaml]> set Display_Name:<[Name]>
@@ -99,50 +93,55 @@ External_Player_Data_Join_Event:
       - if !<yaml[<[GlobalYaml]>].contains[Tab_Display_name]>:
         - yaml id:<[GlobalYaml]> set Tab_Display_name:<[Name]>
 
-      # % ██ [ Fire Player Login Tasks ] ██
+    # % ██ [ Fire Player Login Tasks ] ██
       - define PlayerMap <map.with[Name].as[<[Name]>].with[Server].as[<bungee.server>]>
       - if <yaml[<[GlobalYaml]>].contains[Rank]>:
-        - define PlayerMap <[PlayerMap].with[Rank].as[<yaml[global.player.<[UUID]>].read[rank].strip_color>]>
+        - define PlayerMap <[PlayerMap].with[Rank].as[<yaml[<[GlobalYaml]>].read[rank].strip_color>]>
       - if <[Event]> == Joined:
         - bungeerun Relay Player_Join_Message def:<list_single[<[PlayerMap]>]>
       - else:
         - bungeerun Relay Player_Switch_Message def:<list_single[<[PlayerMap]>]>
 
-Error_Handler_PlayerData:
-  type: task
-  debug: true
-  Record:
-    - debug record start
-  script:
-    - define WeirdList <list>
-    - foreach Name|UUID|Server as:Tag:
-      - if <[<[Tag]>]||invalid> == invalid:
-        - foreach next
-      - else:
-        - if <[<[Tag]>]> == null:
-          - foreach next
-      - define WeirdList:->:<[Tag]>
-    - if <[WeirdList].is_empty>:
-      - stop
-    - define Context <list>
-    - foreach <[WeirdList]> as:Tag:
-      - define Context "<[Context].include_single[`**<&lt>context.<[Tag]><&gt>`** returned: `<[<[Tag]>]>`]>"
-    - define Context "<[Context].include_single[`**<&lt>context.<[Tag]><&gt>`** returned: `<[<[Tag]>]>`]>"
-    - ~debug record submit save:mylog
-    - define Link "<entry[mylog].submitted||DEBUG FAILED>"
-    - define Text "<&lt>@!626086306606350366<&gt> <&lt>a:blueweewoo:725197352645689435<&gt> I'm alerting you about the script setup for debugging a Bungee Event issue:<&nl> <[Link]><&nl><[Context].separated_by[<&nl>]>"
-    - bungeerun Relay Simple_Discord_Embed def:<list_single[<[Text]>].include[631492353059717131]>
+#@modify_global_player_data_safe:
+#@  type: task
+#@  definitions: uuid|node|value
+#@  script:
+#^    - if <yaml[data_handler].contains[player.<[uuid]>]> && <yaml[data_handler].read[player.<[uuid]>.server]> != <bungee.server>:
+#^      - bungeerun player_data_safe_modify def:<[uuid]>|<[node]>|<[value]>
+#^    - else if <yaml.list.contains[global.player.<[uuid]>]>:
+#^      - yaml id:global.player.<[uuid]> set <[node]>:<[value]>
+#^    - else:
+#^      - yaml id:global.player.<[uuid]> load:data/players/<[uuid]>.yml
+#^      - yaml id:global.player.<[uuid]> set <[node]>:<[value]>
+#^      - yaml id:global.player.<[uuid]> savefile:data/players/<[uuid]>.yml
+#^      - yaml id:global.player.<[uuid]> unload
 
-modify_global_player_data_safe:
-  type: task
-  definitions: uuid|node|value
-  script:
-    - if <yaml[data_handler].contains[player.<[uuid]>]> && <yaml[data_handler].read[player.<[uuid]>.server]> != <bungee.server>:
-      - bungeerun player_data_safe_modify def:<[uuid]>|<[node]>|<[value]>
-    - else if <yaml.list.contains[global.player.<[uuid]>]>:
-      - yaml id:global.player.<[uuid]> set <[node]>:<[value]>
-    - else:
-      - yaml id:global.player.<[uuid]> load:data/players/<[uuid]>.yml
-      - yaml id:global.player.<[uuid]> set <[node]>:<[value]>
-      - yaml id:global.player.<[uuid]> savefile:data/players/<[uuid]>.yml
-      - yaml id:global.player.<[uuid]> unload
+# % ██  [ Retrieves a map of the player's information, with the keys 'name, uuid, server' based on the player's name ] ██
+# % ██  [ Returns 'null' if the player name is invalid (or not online) ] ██
+# - ██  [ Usage ]  Retrieves the player's information (in map form) from 'hub1' and stores it in <entry[player_map].result>.
+# - ██  [       ]  - ~bungeetag server:hub1 <proc[player_info_map].context[<[player_input]>]> save:player_map
+# - ██  [       ]  Retrieves the player's infortmation (in map form) and stores it in the `player_map` definition. (only works on 'hub1')
+# - ██  [       ]  - define player_map <proc[player_info_map].context[<[player_input]>]>
+
+player_info_map:
+    type: procedure
+    definitions: input
+    script:
+    - if <yaml[data_handler].contains[players.<[input]>]>:
+      - determine <yaml[data_handler].read[players.names.<[input]>].with[name].as[<[input]>]>
+    - determine null
+    
+# % ██  [ Retrieves a map of the player's information, with the keys 'name, uuid, server' based on the player's uuid ] ██
+# % ██  [ Returns 'null' if the player uuid is invalid (or not online) ] ██
+# - ██  [ Usage ]  Retrieves the player's information (in map form) from 'hub1' and stores it in <entry[player_map].result>.
+# - ██  [       ]  - ~bungeetag server:hub1 <proc[player_info_map_uuid].context[<[player_uuid]>]> save:player_map
+# - ██  [       ]  Retrieves the player's infortmation (in map form) and stores it in the `player_map` definition. (only works on 'hub1')
+# - ██  [       ]  - define player_map <proc[player_info_map_uuid].context[<[player_uuid]>]>
+
+player_info_map_uuid:
+    type: procedure
+    definitions: input
+    script:
+    - if <yaml[data_handler].contains[players.<[input]>]>:
+      - determine <yaml[data_handler].read[players.uuids.<[input]>].with[uuid].as[<[input]>]>
+    - determine null

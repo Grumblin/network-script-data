@@ -48,11 +48,11 @@ Error_Response_Webhook:
             - define Footer "<map.with[text].as[Script Error Count (*/hr)<&co> <[Data].get[Script].get[Error_Count]>]>"
             - define Embed_Maps <[Embed_Maps].include[<map.with[footer].as[<[Footer]>]>]>
             
-            - define Title_Text "<&lb>BORKED<&rb><[Script_Name]> error on <[Server]>"
+            - define Title_Text "<&lb>BORKED<&rb><[Script_Name]> error on <[Server].to_titlecase>"
             - define Body_Text "<[Body_Text].include_single[<&gt> **Script Information**<&co><&nl><&nl>Script Name<&co>  `<[Script_Name]>`<&nl><&nl>Script Reference<&co>  <&lb>`<[File_Directory]>`<&rb>(<[File_Link]>)<&nl><&nl>Script Line<&co> <[Script_Line]><&nl><&nl>]>"
         - else:
-            - define Title_Text "<&lb>BORKED<&rb> Error on <[Server]>"
-            - define Field_List "<[Field_List].include_single[<map.with[name].as[Note:].with[value].as[Executed via `/ex`].with[inline].as[true]>]>"
+            - define Title_Text "<&lb>BORKED<&rb> Error on <[Server].to_titlecase>"
+            - define Field_List "<[Field_List].include_single[<map.with[name].as[Note:].with[value].as[`Different Queue Callback`].with[inline].as[true]>]>"
 
     # % ██ [ Verify Player Fields      ] ██
         - if <[Data].keys.contains[Player]>:
@@ -86,9 +86,8 @@ Error_Response_Webhook:
         - define Map <map.include[<script.parsed_Key[Hook_Body]>].to_json>
 
     # % ██ [ Submit Webhook            ] ██
-        - ~webget <[Hook]>?wait=true data:<[Map]> headers:<[Headers]> save:response
+        - ~webget <[Hook]> data:<[Map]> headers:<[Headers]> save:response
         - inject Web_Debug.Webget_Response
-        - define Webhook_Data <util.parse_yaml[<entry[response].result>]>
         - yaml id:<[DUUID]> unload
 
     Control_Field:
@@ -96,14 +95,14 @@ Error_Response_Webhook:
         value: <&lb>`<&lb>Click to Generate Issue Template<&rb>`<&rb>(<[Issue_URL]>)for this error report.
     Hook_Body:
         embeds: <list_single[<[Embed_Maps]>]>
-        username: <[Server]> Server
+        username: <[Server].to_titlecase> Server
         avatar_url: https://cdn.discordapp.com/attachments/626098849127071746/737916305193173032/AY7Y8Zl9ylnIAAAAAElFTkSuQmCC.png
     Message_Context:
         title: "`[Click for Log]` Error Response:"
         url: <[Log_URL]>
         description: <[Message]>
         color: 5820671
-        username: <[Server]> Error Response
+        username: <[Server].to_titlecase> Error Response
         avatar_url: https://cdn.discordapp.com/attachments/626098849127071746/737916305193173032/AY7Y8Zl9ylnIAAAAAElFTkSuQmCC.png
     AGDev: 631199819817549825
     Channel_Map:
