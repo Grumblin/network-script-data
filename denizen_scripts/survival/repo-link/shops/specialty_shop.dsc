@@ -41,7 +41,7 @@ specialtyHandler:
                         - playsound <player> sound:UI_BUTTON_CLICK volume:0.6 pitch:1.4
                         - give <script[specialtyData].parsed_key[Items.<context.item.nbt[key]>.Item]>
                         - money take quantity:<script[specialtyData].data_key[Items.<context.item.nbt[key]>.Prices].before[/]>
-                        - inventory set "o:<item[player_head].with[skull_skin=<player.skull_skin>;display_name=<&e><&o><player.name>;lore=<&a>Money: <&e><player.money>]>" to:<player.open_inventory> slot:5
+                        - give "<item[player_head].with[skull_skin=<player.skull_skin>;display_name=<&e><&o><player.name>;lore=<&a>Money: <&e><player.money>]>" to:<player.open_inventory> slot:5
                     - else:
                         - narrate "<&c>You don't have enough money"
                         - playsound <player> sound:ENTITY_VILLAGER_NO volume:0.6 pitch:1.4
