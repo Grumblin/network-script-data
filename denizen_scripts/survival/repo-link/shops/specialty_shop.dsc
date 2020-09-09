@@ -53,7 +53,6 @@ specialtyHandler:
                         - give "<item[player_head].with[skull_skin=<player.skull_skin>;display_name=<&e><&o><player.display_name>;lore=<&a>Money: <&e><player.money>]>" to:<player.open_inventory> slot:5
                     - else:
                         - narrate "<&c>You don't have the specified item!"
-            - stop
 
 specialtyData:
     type: data
