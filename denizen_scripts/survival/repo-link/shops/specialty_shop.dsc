@@ -4,19 +4,16 @@ specialty_shop_assignment:
         on assignment:
         - trigger name:click state:true
         on click:
-        - inject specialtyInventoryInject
-
-specialtyInventoryInject:
-    type: task
-    script:
-    - define inventory <inventory[specialtyInventory]>
-    - give "<item[player_head].with[skull_skin=<player.skull_skin>;display_name=<&e><&o><player.display_name>;lore=<&a>Money: <&e><player.money>]>" to:<[inventory]> slot:5
-    - inventory open d:<[inventory]>
+        - define inventory <inventory[specialtyInventory]>
+        - give "<item[player_head].with[skull_skin=<player.skull_skin>;display_name=<&e><&o><player.display_name>;lore=<&a>Money: <&e><player.money>]>" to:<[inventory]> slot:5
+        - inventory open d:<[inventory]>
 
 specialtyInventory:
     type: inventory
     inventory: chest
     title: Specialty Shop
+    definitions:
+        filler: <item[white_stained_glass_pane].with[display_name=<&f>]>
     procedural items:
     - if <player.has_flag[teleportation_recipe]>:
         - define item <item[teleportation_shard].with[nbt=item/Teleportation_Shard;lore=<&a>Buy<&sp>Price:<&sp><&e><script[specialtyData].data_key[Items.Teleportation_Shard.Prices].before[/]>|<&c>Sell<&sp>Price:<&sp><script[specialtyData].data_key[Items.Teleportation_Shard.Prices].after[/]>]>
@@ -46,7 +43,7 @@ specialtyHandler:
                         - playsound <player> sound:UI_BUTTON_CLICK volume:0.6 pitch:1.4
                         - give <script[specialtyData].parsed_key[Items.<context.item.nbt[key]>.Item]>
                         - money take quantity:<script[specialtyData].data_key[Items.<context.item.nbt[key]>.Prices].before[/]>
-                        - inventory set "o:<item[player_head].with[skull_skin=<player.skull_skin>;display_name=<&e><&o><player.name>;lore=<&a>Money: <&e><player.money>]>" to:<player.open_inventory> slot:5
+                        - give "<item[player_head].with[skull_skin=<player.skull_skin>;display_name=<&e><&o><player.name>;lore=<&a>Money: <&e><player.money>]>" to:<player.open_inventory> slot:5
                     - else:
                         - narrate "<&c>You don't have enough money"
                         - playsound <player> sound:ENTITY_VILLAGER_NO volume:0.6 pitch:1.4
@@ -55,10 +52,9 @@ specialtyHandler:
                         - playsound <player> sound:UI_BUTTON_CLICK volume:0.6 pitch:1.4
                         - take slot:<player.inventory.find.scriptname[<context.item.nbt[key]>]>
                         - money give quantity:<script[specialtyData].data_key[Items.<context.item.nbt[key]>.Prices].after[/]>
-                        - inventory set "o:<item[player_head].with[skull_skin=<player.skull_skin>;display_name=<&e><&o><player.display_name>;lore=<&a>Money: <&e><player.money>]>" to:<player.open_inventory> slot:5
+                        - give "<item[player_head].with[skull_skin=<player.skull_skin>;display_name=<&e><&o><player.display_name>;lore=<&a>Money: <&e><player.money>]>" to:<player.open_inventory> slot:5
                     - else:
                         - narrate "<&c>You don't have the specified item!"
-            - stop
 
 specialtyData:
     type: data
