@@ -4,14 +4,9 @@ specialty_shop_assignment:
         on assignment:
         - trigger name:click state:true
         on click:
-        - inject specialtyInventoryInject
-
-specialtyInventoryInject:
-    type: task
-    script:
-    - define inventory <inventory[specialtyInventory]>
-    - give "<item[player_head].with[skull_skin=<player.skull_skin>;display_name=<&e><&o><player.display_name>;lore=<&a>Money: <&e><player.money>]>" to:<[inventory]> slot:5
-    - inventory open d:<[inventory]>
+        - define inventory <inventory[specialtyInventory]>
+        - give "<item[player_head].with[skull_skin=<player.skull_skin>;display_name=<&e><&o><player.display_name>;lore=<&a>Money: <&e><player.money>]>" to:<[inventory]> slot:5
+        - inventory open d:<[inventory]>
 
 specialtyInventory:
     type: inventory
