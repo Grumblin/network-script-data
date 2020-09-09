@@ -50,7 +50,7 @@ specialtyHandler:
                         - playsound <player> sound:UI_BUTTON_CLICK volume:0.6 pitch:1.4
                         - take slot:<player.inventory.find.scriptname[<context.item.nbt[key]>]>
                         - money give quantity:<script[specialtyData].data_key[Items.<context.item.nbt[key]>.Prices].after[/]>
-                        - inventory set "o:<item[player_head].with[skull_skin=<player.skull_skin>;display_name=<&e><&o><player.display_name>;lore=<&a>Money: <&e><player.money>]>" to:<player.open_inventory> slot:5
+                        - give "<item[player_head].with[skull_skin=<player.skull_skin>;display_name=<&e><&o><player.display_name>;lore=<&a>Money: <&e><player.money>]>" to:<player.open_inventory> slot:5
                     - else:
                         - narrate "<&c>You don't have the specified item!"
             - stop
