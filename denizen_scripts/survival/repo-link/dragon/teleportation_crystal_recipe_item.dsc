@@ -13,5 +13,5 @@ teleportation_crystal_recipe_handler:
             - flag teleportation_recipe
             - take scriptname:teleportation_crystal_recipe_item
         - else
-            - determine cancelled
             - narrate "You can't use this item again"
+            - determine cancelled
