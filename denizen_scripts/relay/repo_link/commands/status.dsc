@@ -39,7 +39,7 @@ Status_DCommand:
 
       - define Fields <list>
       - define FieldMap <map.with[inline].as[true]>
-      - foreach <yaml[bungee.config].list_keys[servers]> as:Server:
+      - foreach <yaml[bungee_config].list_keys[servers]> as:Server:
         - define Field <[FieldMap].with[name].as[<[Server].to_titlecase>]>
         - if <bungee.list_servers.contains[<[Server]>]>:
           - ~Bungeetag server:<[Server]> <bungee.connected> save:Data
@@ -60,7 +60,7 @@ Status_DCommand:
       - stop
       
   # % ██ [ Server Argument Check ] ██
-    - if !<yaml[bungee.config].contains[servers.<[Server]>]>:
+    - if !<yaml[bungee_config].contains[servers.<[Server]>]>:
       - stop
     - else if !<bungee.list_servers.contains[<[Server]>]>:
       - stop
@@ -69,7 +69,7 @@ Status_DCommand:
       - define Flags <list[-o]>
   # % ██ [ All Flag ] ██
     - else if <list[-a|-all].contains_any[<[Args]>]>:
-      - define Flags <list[-o|-p|-w|-pl|-v|-ch|-tps|-s]>
+      - define Flags <list[-o|-p|-w|-pl|-v|-ch|-tps|-s|-u]>
     - else:
       - define Flags <[Args].remove[first]>
     
@@ -102,7 +102,7 @@ Status_DCommand:
         - define Field <[Field].with[value].as[<entry[Data].result>]>
         - define Fields <[Fields].include[<[Field]>]>
     
-  # % ██ [ Build Data
+  # % ██ [ Build Data ] ██
   #^- define Data "<map.with[title].as[<[Server]> Status]>"
     - define Data "<map.with[color].as[code].with[fields].as[<[Fields]>].with[username].as[<[Server]> Server].with[avatar_url].as[https://cdn.discordapp.com/attachments/625076684558958638/739228903700168734/icons8-code-96.png]>"
     - if !<[Duplicates].exclude[Online].is_empty>:
@@ -152,3 +152,8 @@ Status_DCommand:
       nodes:
         - s
         - scripts
+    Uptime:
+      tag: "Real<&co> `<server.real_time_since_start.formatted>`<n>Delta<&co> `<server.delta_time_since_start.formatted>`"
+      nodes:
+        - u
+        - uptime
