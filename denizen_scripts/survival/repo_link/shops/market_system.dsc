@@ -57,9 +57,6 @@ market_system_data:
 #      category: crafting
 #      minimum_value: 2200
 
-#    ancient_debris:
-#      category: crafting
-#      minimum_value: 500
 
     diamond:
       category: crafting
