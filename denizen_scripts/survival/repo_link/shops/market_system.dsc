@@ -52,10 +52,6 @@ market_system_data:
       lore: <&a>Trade Goods!
   items:
     # Crafting
-#    -- Nether stuff can come later, this is currently OP.
-#    netherite_ingot:
-#      category: crafting
-#      minimum_value: 2200
 
 
     diamond:
